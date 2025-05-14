@@ -5,9 +5,13 @@ Data: 11 de maio de 2025
 
 ---
 
+## Abstract
+
+With the increasing complexity of market scenarios, the need for robust and intelligent demand forecasting solutions is growing, especially in the retail sector. This work presents a study based on data from the Kaggle competition "Store Sales - Time Series Forecasting," which provides over four years of sales data from a national retail company in Ecuador. The proposed approach involves the integration of multiple data sources, including holidays, oil prices, transaction volume, and regional events, followed by preprocessing, feature engineering, evaluation of predictive models, hyperparameter selection and tuning, and the application of ensemble techniques. The results demonstrate that the ensemble outperforms individual models, highlighting the potential of machine learning in demand forecasting in complex and dynamic environments.
+
 ## Resumo
 
-Com a crescente complexidade dos cenários de mercado, aumenta a necessidade por soluções robustas e inteligentes para previsão de demanda, especialmente no setor varejista. Este trabalho apresenta um estudo baseado nos dados da competição do Kaggle "Store Sales - Time Series Forecasting", que disponibiliza mais de quatro anos de vendas de uma empresa nacional de varejo no Equador. A abordagem proposta envolve a integração de múltiplas fontes de dados — incluindo feriados, preços de petróleo, volume de transações e eventos regionais — seguida de pré-processamento, feature engineering, avaliação de modelos preditivos, seleção e tunagem com Optuna, além da aplicação de técnicas de ensemble. Os resultados demonstram que o ensemble supera modelos individuais, evidenciando o potencial do aprendizado de máquina na previsão de demanda em ambientes complexos e dinâmicos.
+Com a crescente complexidade dos cenários de mercado, aumenta a necessidade por soluções robustas e inteligentes para previsão de demanda, especialmente no setor varejista. Este trabalho apresenta um estudo baseado nos dados da competição do Kaggle "Store Sales - Time Series Forecasting", que disponibiliza mais de quatro anos de vendas de uma empresa nacional de varejo no Equador. A abordagem proposta envolve a integração de múltiplas fontes de dados, incluindo feriados, preços de petróleo, volume de transações e eventos regionais, seguida de pré-processamento, feature engineering, avaliação de modelos preditivos, seleção e tunagem de hyperparametros, além da aplicação de técnicas de ensemble. Os resultados demonstram que o ensemble supera modelos individuais, evidenciando o potencial do aprendizado de máquina na previsão de demanda em ambientes complexos e dinâmicos.
 
 ---
 
@@ -21,7 +25,7 @@ Com o avanço das técnicas de aprendizado de máquina (AM), tornou-se possível
 
 ### 1.2 Apresentação da Competição
 
-O objetivo central deste projeto é desenvolver e avaliar uma pipeline completa de aprendizado de máquina para prever as vendas unitárias de milhares de itens em diversas lojas da Corporación Favorita, uma grande varejista equatoriana. Esta tarefa é baseada nos dados da competição Store Sales - Time Series Forecasting hospedada na plataforma Kaggle (TODO CITE). Especificamente, o modelo deve prever as vendas para um horizonte de 15 dias subsequentes à última data presente no conjunto de dados de treinamento.
+O objetivo central deste projeto é desenvolver e avaliar uma pipeline completa de aprendizado de máquina para prever as vendas unitárias de milhares de itens em diversas lojas da Corporación Favorita, uma grande varejista equatoriana. Esta tarefa é baseada nos dados da competição [Store Sales - Time Series Forecasting hospedada na plataforma Kaggle](https://www.kaggle.com/competitions/store-sales-time-series-forecasting). Especificamente, o modelo deve prever as vendas para um horizonte de 15 dias subsequentes à última data presente no conjunto de dados de treinamento.
 
 Os dados fornecidos abrangem informações sobre as lojas, incluindo metadados como cidade, estado, tipo e cluster que a loja pertence; dados históricos de vendas unitárias para uma vasta gama de produtos; preços diários do petróleo, um fator economicamente relevante para o Equador; informações sobre promoções aplicadas aos itens; o número de transações diárias por loja; e um calendário detalhado de feriados nacionais, regionais e locais, além de eventos especiais que podem impactar o volume de vendas.
 
@@ -33,7 +37,7 @@ Os dados fornecidos abrangem informações sobre as lojas, incluindo metadados c
 
 A competição disponibiliza ao todo 6 conjuntos de dados fundamentais para a tarefa de previsão de demanda. Exemplo dos datasets são incluídos nas tabelas subsequentes.
 
-Os arquivos principais `train.csv` e `test.csv` abrangem, respectivamente, os períodos de 1º de janeiro de 2013 a 15 de agosto de 2017 (1687 dias) e de 16 a 31 de agosto de 2017 (15 dias), totalizando 1702 dias. Estes arquivos detalham as vendas (`sales`) e os itens em promoção (`onpromotion`) para cada data, loja (`store_nbr`) e família de produtos (`family`). A granularidade, com 54 lojas e 33 famílias, resulta em 1.782 séries temporais distintas. O desafio consiste, portanto em prever para as 1.782 séries temporais únicas a demanda, e portanto vendas, dos 15 dias do período de teste.
+Os arquivos principais `train.csv` e `test.csv` abrangem, respectivamente, os períodos de 1º de janeiro de 2013 a 15 de agosto de 2017 (1687 dias) e de 16 a 31 de agosto de 2017 (15 dias), totalizando 1702 dias. Estes arquivos detalham as vendas (`sales`) e os itens em promoção (`onpromotion`) para cada data, loja (`store_nbr`) e família de produtos (`family`). A granularidade, com 54 lojas e 33 famílias, resulta em 1.782 séries temporais distintas. O desafio consiste em, portanto, prever para essas 1.782 séries temporais únicas a demanda diária dos 15 dias presentes no período de teste.
 
 | id  | date       | store_nbr | family     | sales | onpromotion |
 | --- | ---------- | --------- | ---------- | ----- | ----------- |
@@ -42,8 +46,9 @@ Os arquivos principais `train.csv` e `test.csv` abrangem, respectivamente, os pe
 | 2   | 2013-01-01 | 1         | BEAUTY     | 0.0   | 0           |
 | 3   | 2013-01-01 | 1         | BEVERAGES  | 0.0   | 0           |
 | 4   | 2013-01-01 | 1         | BOOKS      | 0.0   | 0           |
+Descrição: `train.csv` e `test.csv`, 3000888 rows × 6 columns. Informações de promoção e vendas (target variable) para 1.782 séries temporais distintas, especificadas por `store_nbr`e `family` em um período de 1º de janeiro de 2013 a 15 de agosto de 2017 (1687 dias de treino) e de 16 a 31 de agosto de 2017 (15 dias), totalizando 1702 dias.
 
-Informações contextuais sobre as lojas são fornecidas pelo `stores.csv`, que detalha a localização (cidade, estado) e categoriza as lojas por tipo (type) e cluster (cluster). Embora os critérios desses agrupamentos não sejam explícitos nas especificações, eles habilitam a exploração de modelos especializados, como técnicas de ensemble ajustadas a cada perfil de loja.
+Informações contextuais sobre as lojas são fornecidas pelo dataset `stores.csv`, que detalha a localização (cidade, estado) e categoriza as lojas por tipo (type) e cluster (cluster). Embora os critérios desses agrupamentos não sejam explícitos nas especificações da competição, eles habilitam, através de técnincas de ensemble, a utilização de modelos especializados ajustadas a cada perfil de loja. Essa técninca será explorada na seção 4.3.
 
 | store_nbr | city  | state     | type | cluster |
 | --------- | ----- | --------- | ---- | ------- |
@@ -52,6 +57,7 @@ Informações contextuais sobre as lojas são fornecidas pelo `stores.csv`, que 
 | 3         | Quito | Pichincha | C    | 8       |
 | 4         | Quito | Pichincha | D    | 9       |
 | 5         | Quito | Pichincha | E    | 13      |
+Descrição: Dataset `stores.csv`, 54 rows × 5 columns. Informações das 54 lojas presentes na competição.
 
 O conjunto `oil.csv` fornece os preços diários do barril de petróleo ao longo de todo o intervalo de treino e teste. Considerando que o Equador tem sua economia fortemente baseada nas exportações de petróleo  (Figura X), oscilações nesse preço podem afetar diretamente o poder de compra da população e, consequentemente, o comportamento de consumo. Essa variável, portanto, é de alta relevância e deve ser incorporada à modelagem.
 
@@ -64,8 +70,9 @@ O conjunto `oil.csv` fornece os preços diários do barril de petróleo ao longo
 | 2013-01-03 | 92.97      |
 | 2013-01-04 | 93.12      |
 | 2013-01-07 | 93.2       |
+Descrição: Dataset `oil.csv`, 1218 rows × 2 columns. Preço do barril de petróleo por data.
 
-O arquivo `holidays_events.csv` traz informações sobre feriados e eventos no Equador, incluindo tipo (nacional, regional, adicional etc.), possíveis transferências de data, e informações adicionais. Há feriados como Natal, Ano Novo, Dia dos Mortos que são recorrentes e podem afetar significativamente os padrões de consumo, e outros pontuais, como eventos esportivos, que podem gerar ruído ou infomrações úteis sobre os dados que também devem ser levados em consideração.
+O arquivo `holidays_events.csv` fornece informações sobre feriados e eventos ocorridos no Equador. Este conjunto de dados detalha o tipo de evento: nacional, regional, local, sua descrição, e se houve transferência da data de comemoração. É importante notar a presença tanto de feriados recorrentes com potencial de forte impacto nos padrões de consumo, como Natal, Ano Novo e o Dia dos Finados, quanto de eventos pontuais, como competições esportivas.
 
 | date       | type    | locale   | locale_name | description                   | transferred |
 | ---------- | ------- | -------- | ----------- | ----------------------------- | ----------- |
@@ -74,6 +81,8 @@ O arquivo `holidays_events.csv` traz informações sobre feriados e eventos no E
 | 2012-04-12 | Holiday | Local    | Cuenca      | Fundacion de Cuenca           | False       |
 | 2012-04-14 | Holiday | Local    | Libertad    | Cantonizacion de Libertad     | False       |
 | 2012-04-21 | Holiday | Local    | Riobamba    | Cantonizacion de Riobamba     | False       |
+
+Descrição: Dataset `holidays_events.csv`, 350 rows × 6 columns. Informações de feriados e eventos comemorativos.
 
 O dataset `transactions.csv` oferece contagens de transações diárias por loja. O interessante é que possuimos esses dados apenas para o período de treino e sem granularidade por família de produto, apenas por loja, o que exige um processamento adequado para que seja possível seu uso para os dados de teste.
 
@@ -85,11 +94,17 @@ O dataset `transactions.csv` oferece contagens de transações diárias por loja
 | 2013-01-02 | 3         | 3487         |
 | 2013-01-02 | 4         | 1922         |
 
+Descrição: Dataset `transactions.csv`, 83488 rows × 3 columns. Transações diárias por loja.
+
 Por fim, informações sobre alguns eventos contextuais são fornecidos pela competição, como os pagamentos quinzenais no setor público, realizados nos dias 15 e no último dia de cada mês, que podem influenciar o consumo, e o terremoto de magnitude 7.8 ocorrido em 16 de abril de 2016. Este último teve impacto significativo nas vendas de itens essenciais por várias semanas, afetando o consumo. A modelagem correta desses eventos pode garantir previsões mais precisas e robustas.
 
 #### Pré-processamento
 
-O pré-processamento dos dados concentrou-se primordialmente no tratamento de valores ausentes e na análise de outliers. Com relação a outliers, não foram identificadas ocorrências significativas que demandassem remoção ou substituição, como valores semanticamente inconsistentes (e.g., vendas negativas). Os valores faltantes, por sua vez, foram tratados caso a caso. Nos dados de preços do petróleo, por exemplo, foram observadas ausências principalmente nos fins de semana, possivelmente devido à interrupção das negociações de mercado nesse período, e preenchidas utilizando-se de forward fill, i.e os valores faltantes no fim de semana serão iguais aos valores de sexta-feira. Sobre os dados de transações diárias, a fim de lidar com os dados faltantes no período de teste, foi empregada a interpolação linear, permitindo sua utilização pelo modelo. Após os processamentos realizados, os dados dos diferentes modelos foram unidos em apenas um grande dataset que é utilizado na etapa de feature engineering.
+A etapa de pré-processamento de dados foi focada no tratamento de valores ausentes e na análise de outliers. Em relação aos outliers, não se observaram ocorrências semanticamente inconsistentes, como vendas negativas, que necessitassem de remoção ou substituição.
+
+Os valores faltantes, por outro lado, foram tratados de maneira específica para cada conjunto de dados. Nos dados de preços do petróleo, por exemplo, as ausências concentravam-se majoritariamente nos finais de semana, período em que, presume-se, não há negociação de mercado. Para esses casos, aplicou-se a técnica de forward fill, onde os valores do final de semana são preenchidos com o valor registrado na sexta-feira anterior. Já para os dados de transações diárias, a interpolação linear foi utilizada para estimar os valores ausentes durante o período de teste.
+
+Após a conclusão dessas etapas de tratamento, os diversos conjuntos de dados processados foram consolidados em um único dataset completo, que serviu de base para a próxima etapa de feature engineering.
 
 ---
 
@@ -97,17 +112,11 @@ O pré-processamento dos dados concentrou-se primordialmente no tratamento de va
 
 No processo de feature engineering para a previsão de demanda, foram implementadas diversas técnicas para extrair informações relevantes. A partir da data, foram criadas features de calendário, incluindo ano, mês, dia do mês, dia da semana (numérico e nominal), nome do mês, semana do ano, trimestre, dia do ano, e indicadores binários para fins de semana e início/fim de mês, trimestre e ano. O propósito dessas features é fornecer ao modelo sinais explícitos sobre sazonalidades, ciclicidades e eventos calendáricos que influenciam o comportamento das vendas.
 
-Lag features e rolling statistics foram incorporadas para capturar a dinâmica e a dependência temporal dos dados. As lag features consistem nos valores de variáveis em instantes anteriores (e.g., Xt−1​,Xt−2​,...,Xt−k​), permitindo que o modelo aprenda com o passado recente e capture a inércia ou efeitos retardados. Foram criadas lags de até 7 dias para as variáveis de preço do petróleo, promoções, transações e para a própria varíavel alvo de vendas. Para as mesmas variáveis foram criada as rolling statistics, que calculam médias e desvios padrão calculados sobre janelas deslizantes de 7, 14 e 28 dias. Elas resumem o comportamento local da série, suavizando ruídos, destacando tendências de curto prazo e quantificando a volatilidade recente.
+Features de Lag e rolling statistics foram incorporadas para capturar a dinâmica e a dependência temporal dos dados. As features de lag consistem nos valores de variáveis em instantes anteriores (e.g., Xt−1​,Xt−2​,...,Xt−k​), permitindo que o modelo aprenda com o passado recente e capture a inércia ou efeitos retardados. Foram criadas lags de até 7 dias para as variáveis de preço do petróleo, promoções, transações e para a própria varíavel alvo de vendas. Para as mesmas variáveis foram criada as rolling statistics, que calculam médias e desvios padrão sobre janelas deslizantes de 7, 14 e 28 dias. Elas resumem o comportamento local da série, suavizando ruídos, destacando tendências de curto prazo e quantificando a volatilidade recente.
 
-Para tratar eventos específicos, como os dias de pagamento (mencionados na competição), foram criadas features binárias de proximidade (e.g., janela de +/- 15 dias) e contadores de dias relativos ao ciclo de pagamento. Analogamente, para o terremoto de 16 de abril de 2016, foram desenvolvidas features para indicar a janela do evento e a contagem de dias antes e depois do sismo, buscando modelar seu impacto particular.
+Para tratar eventos específicos, como os dias de pagamento (mencionados na competição), foram criadas features binárias de proximidade (e.g., janela de +/- 15 dias) e contadores de dias relativos ao ciclo de pagamento. Analogamente, para o terremoto de 16 de abril de 2016, foram desenvolvidas features para indicar a janela do evento e a contagem de dias antes e depois do sismo.
 
-Por fim, a fim de eliminar os tipos categóricos de algumas variáveis, foi utilizado a técnina de target encoding. Diferentemente de métodos como one-hot encoding, que podem expandir significativamente o espaço de features com variáveis de alta cardinalidade, o target encoding atribui a cada categoria um único valor numérico. No caso desse estudo, a média da variável alvo observada para os registros que contêm aquela categoria específica. Dessa forma, é embutida a relação entre a categoria e o target na representação da feature.
-
-<!-- No contexto de previsão de demanda com base em séries temporais para, a incorporação de informações relacionadas à estrutura temporal dos dados é essencial para capturar padrões sazonais, tendências e efeitos recorrentes. A partir da variável de data presente no conjunto de dados, foram extraídos diversos componentes temporais, tais como: ano, mês, dia do mês, dia da semana (em formatos numérico e nominal), nome do mês, semana do ano, trimestre e dia do ano. Adicionalmente, foram gerados indicadores binários que identificam se uma data corresponde a um fim de semana, bem como marcadores para início e término de meses, trimestres e anos. Essas variáveis enriquecem a capacidade do modelo de identificar comportamentos sazonais associados, por exemplo, ao dia da semana, ao calendário comercial ou a eventos periódicos. 
-
-Complementando as variáveis derivadas de calendário, o processo de feature engineering incorporou técnicas para capturar dinâmicas temporais complexas. Foram introduzidas lag features (defasagens), construídas a partir de valores passados de séries relevantes, com o objetivo de permitir ao modelo aprender padrões de dependência de curto prazo e a inércia característica de fenômenos temporais. Adicionalmente, foram computadas rolling statistics, incluindo média, desvio padrão, valor máximo e mínimo, utilizando janelas deslizantes de 7, 14 e 28 dias. Estas janelas visam capturar comportamentos sazonais de curto a médio prazo, como ciclos semanais e quinzenais comuns no varejo, onde as médias móveis suavizam flutuações e destacam tendências locais, enquanto outras métricas avaliam volatilidade e extremos. Ambas as técnicas – lags e rolling statistics – foram aplicadas às features de promoção, transações das lojas e preço do petróleo.
-
-Para endereçar eventos específicos mencionados pela competição, como os dias de pagamento no setor público, foram criadas features binárias indicando a proximidade a essas datas (e.g., ocorrência em uma janela de +/- N dias em torno do pagamento) e features numéricas para a contagem de dias até o próximo ciclo de pagamento. De modo análogo, para o terremoto de 16 de abril de 2016 no Equador, foram desenvolvidas variáveis para sinalizar a ocorrência do evento dentro de uma janela temporal específica e para quantificar a contagem de dias antes e após o sismo, permitindo modelar seu impacto disruptivo. -->
+A fim de eliminar os tipos categóricos de algumas variáveis, foi utilizado a técnina de target encoding. Diferentemente de métodos como one-hot encoding, que podem expandir significativamente o espaço de features com variáveis de alta cardinalidade, o target encoding atribui a cada categoria um único valor numérico. No caso desse estudo, a média da variável alvo observada para os registros que contêm aquela categoria específica. Dessa forma, é embutida a relação entre a categoria e o target na representação da feature.
 
 ### Seção 4 - Treinamento dos Modelos
 
@@ -124,7 +133,9 @@ RMSLE=n1​i=1∑n​(ln(pi​+1)−ln(ai​+1))2​
 
 #### Série de Modelos
 
-Na fase inicial, um conjunto de modelos de regressão foi selecionado para treinamento e avaliação. Estes incluíram: modelos de baseline (Dummy Regressor – previsão pela média, e Linear Regression), modelos lineares regularizados (Ridge, Lasso, ElasticNet), modelos não lineares (KNN, Decision Tree), ensembles de árvores (Random Forest, Gradient Boosting, HistGradientBoosting), algoritmos de gradient boosting avançados (LightGBM, XGBoost, CatBoost) e uma Rede Neural (MLP). Todos os modelos foram treinados com suas configurações padrões e submetidos a um processo de validação cruzada para séries temporais com 4 partições (folds). Os resultados das métricas dos modelos culminou na média geral da performance de seus folds. Os resultados obtidos são mostrados nas tabelas a seguir:
+A etapa preliminar de modelagem compreendeu a seleção e avaliação comparativa de um grupo de algoritmos de regressão. Foram considerados modelos de referência (baselines), como o Dummy Regressor (predição baseada na média dos dados de treinamento) e a Regressão Linear, progredindo para algoritmos de maior complexidade. Estes incluíram a Árvore de Decisão, ensembles de árvores como o HistGradientBoosting, e o algoritmo de gradient boosting avançado LightGBM.
+
+Todos os modelos foram inicialmente treinados utilizando suas configurações de hiperparâmetros padrão. Para a avaliação de desempenho, empregou-se de validação cruzada específica para séries temporais, configurada com 4 partições (folds). As métricas gerais de desempenho reportadas para cada modelo representam a média dos resultados obtidos de seus folds. Os resultados detalhados desta etapa são apresentados nas tabelas subsequentes.
 
 DummyRegressor
 | Fold | MAE      | RMSE      | RMSLE  | R²      | Time (s) |
@@ -149,8 +160,6 @@ DecisionTree
 | 2    | 97.9187  | 454.6134 | 1.1981 | 0.8217 | 1045.9238 |
 | 3    | 76.4641  | 405.9469 | 0.6564 | 0.8974 | 1491.5473 |
 | 4    | 70.2314  | 382.1742 | 0.5889 | 0.9212 | 2834.2071 |
-
-RandomForest
 
 HistGradientBoosting
 | Fold | MAE      | RMSE     | RMSLE  | R²     | Time (s) |
@@ -178,47 +187,57 @@ Comparativo de Desempenho Médio dos Modelos na Validação Cruzada
 | HistGradientBoosting | 1.2580     | 370.8698     | 88.6344     | 0.8867     | 10.37           |
 | LightGBM             | 1.3085     | **365.0122** | **87.9848** | **0.8913** | **6.75**        |
 
+A análise dos resultados médios da validação cruzada (Tabela X) evidencia a superioridade dos modelos de ensemble e gradient boosting em relação aos baselines (DummyRegressor, LinearRegression) e à DecisionTree simples. O RandomForest se destaca ao obter o menor RMSLE (0.9740), métrica princiapl da competição, mas ao custo de um tempo de treinamento significativamente alto (1414.68s). HistGradientBoosting apresenta uma performance boa e rápida, e o LightGBM demonstra o melhor desempenho global em termos de RMSE (365.0122), MAE (87.9848) e R² (0.8913), e se consagra como o mais eficiente em tempo de treinamento, com incriveis 6.75s totais de processamento. Com base nos dados de avaliação, o modelo LightGBM é selecionado para as fases subsequentes do estudo, primariamente devido à sua performance e ao seu tempo de processamento reduzido. A próxima etapa da análise foca em investigar o grau de melhoria no desempenho do LightGBM após a otimização de seus hiperparâmetros.
 
-A análise dos resultados médios da validação cruzada (Tabela X) evidencia a superioridade dos modelos de ensemble e gradient boosting em relação aos baselines (DummyRegressor, LinearRegression) e à DecisionTree simples. O RandomForest se destaca ao obter o menor RMSLE (0.9740), métrica princiapl da competição, mas ao custo de um tempo de treinamento significativamente alto (1414.68s). HistGradientBoosting apresenta uma performance boa e rápida, e o LightGBM demonstra o melhor desempenho global em termos de RMSE (365.0122), MAE (87.9848) e R² (0.8913), e se consagra como o mais eficiente em tempo de treinamento, com incriveis 6.75s totais. Com base nos dados de avaliação, o modelo LightGBM é selecionado para as fases subsequentes do estudo, primariamente devido à sua performance e ao seu incrível tempo de processamento. A próxima etapa da análise foca em investigar o grau de melhoria no desempenho do LightGBM após a otimização de seus hiperparâmetros.
+A Figura X detalha a importância relativa das 50% de features consideradas mais preditivas pelo modelo LightGBM. Esta análise da contribuição das features revela que diversas categorias de variáveis são determinantes para a acurácia da predição de demanda. Características categóricas intrínsecas, como family (categoria do produto) e store_nbr (identificador da loja), posicionam-se entre as mais significativas, assim como dados transacionais diretos (transactions) e as médias móveis derivadas destes. Variáveis de natureza temporal, incluindo tanto componentes de calendário (day_of_year, day, day_of_week) quanto diversas formas de vendas defasadas e suas respectivas estatísticas móveis (e.g., sales_lag21, sales_rolling_mean_lag16_window_size28) também demonstraram elevada relevância, o que corrobora a forte dependência temporal inerente às séries de vendas. Adicionalmente, fatores promocionais (onpromotion) e variáveis exógenas como o preço do petróleo (dcoilwtico) e indicadores de eventos (por exemplo, features relacionadas ao terremoto) também integram o conjunto de features significativas.
+
+![Feature Importance](image-1.png)
 
 #### Tunagem de Hyperparametros
 
-A etapa de otimização de hiperparâmetros do LightGBM foi conduzida utilizando o framework Optuna. A escolha desta ferramenta, em detrimento de abordagens como a exploração manual, Grid Search ou Random Search (oferecidas por bibliotecas como Scikit-learn), ou outros frameworks (Hyperopt, Ax), baseia-se na crescente proeminência do Optuna na comunidade científica e em sua capacidade de alcançar resultados notáveis através de algoritmos de busca eficientes.
+A etapa de otimização de hiperparâmetros do LightGBM foi conduzida utilizando o framework [Optuna](https://optuna.org/). A escolha desta ferramenta, em detrimento de abordagens como a exploração manual, Grid Search ou Random Search (oferecidas por bibliotecas como Scikit-learn), ou outros frameworks (Hyperopt, Ax), baseia-se na crescente proeminência do Optuna na comunidade científica e em sua capacidade de alcançar resultados notáveis através de algoritmos de busca eficientes.
 
-Durante a otimização, um conjunto de hiperparâmetros chave foi explorado, incluindo o número de árvores (n_estimators), a taxa de aprendizado (learning_rate), a complexidade das árvores (e.g., num_leaves), os coeficientes de regularização L1 e L2, e as frações de amostragem de dados e atributos (bagging_fraction, feature_fraction). O processo envolveu a execução de 25 trials. Em cada um, o Optuna propõe uma configuração de hiperparâmetros, treina o modelo e avalia seu desempenho, utilizando essa informação para guiar a exploração subsequente do espaço de busca de forma adaptativa e eficiente.
+Akiba, T., Sano, S., Yanase, T., Ohta, T., & Koyama, M. (2019). Optuna: A Next-generation Hyperparameter Optimization Framework. In Proceedings of the 25th ACM SIGKDD International 1 Conference on Knowledge Discovery & Data Mining 2 (pp. 2623-2631).
+
+Durante a otimização, um conjunto de hiperparâmetros chave foi explorado, incluindo o número de árvores (n_estimators), a taxa de aprendizado (learning_rate), a complexidade das árvores (e.g., num_leaves), os coeficientes de regularização L1 e L2, e as frações de amostragem de dados e atributos (bagging_fraction, feature_fraction). O processo envolveu a execução de 25 trials. Em cada trial, o Optuna propõe uma configuração de hiperparâmetros, treina o modelo e avalia seu desempenho, utilizando essa informação para guiar a exploração subsequente do espaço de busca de forma adaptativa e eficiente.
 
 | Modelo             | RMSLE  | RMSE     | MAE     | R²     | Tempo de Treinamento (s) |
 | ------------------ | ------ | -------- | ------- | ------ | ------------------------ |
 | LightGBM Básico    | 0.8919 | 307.8006 | 78.8475 | 0.9493 | 13.8394                  |
 | LightGBM Otimizado | 0.4693 | 285.6477 | 66.1276 | 0.9563 | 170.8635                 |
-
+Descrição: Resultados comparativos para a otimização de hyperparametros para o modelo LightGBM. 
 
 Os resultados, apresentados na Tabela X, demonstram que a otimização de hiperparâmetros produziu um modelo LightGBM significativamente mais eficiente. O modelo otimizado apresentou reduções nos valores de RMSLE (0.4693), RMSE (285.6477) e MAE (66.1276), além de um aumento no coeficiente R² (0.9563), em relação à configuração básica. Esses ganhos refletem uma melhora substancial na precisão e na capacidade preditiva do modelo, evidenciando a importância da etapa de otimização em aplicações de aprendizado de máquina. Observa-se também um acréscimo considerável no tempo de treinamento, que aumentou de 13,84s para 170,86s. Tal crescimento é atribuído à maior complexidade do modelo, que passou de árvores com profundidade máxima de 5 para 11 e de 100 para até 1500 estimadores. No contexto deste estudo, o ganho de desempenho justifica o aumento no custo computacional. Contudo, em outras aplicações, esse trade-off deve ser cuidadosamente avaliado.
 
-![Learning Curve](image.png)
-
-![Feature Importance](image-1.png)
-
-
 #### Ensemble
 
-A considerável variabilidade inerente às séries temporais de vendas motiva a busca por soluções que superam um modelo monolítico em performance, o qual pode não ser capaz de aprender todos os padrões dos dados. Para contornar esse desafio, utiliza-se a criação de múltiplos modelos especializados, cada um treinado em segmentos específicos do conjunto de dados original. A união das previsões desses modelos visa a um resultado final mais robusto e inteligente. Nesse viês, nessa aplicação é desenvolvida três abordagens de ensemble:
-    1. Por Família de Produtos: Criam-se 33 modelos distintos, cada um especializado em uma das 33 famílias de produtos.
-    2. Por Tipo de Loja: Desenvolvem-se 5 modelos, um para cada um dos cinco tipos de loja (A,B,C,D,E).
-    3. Por Cluster de Loja: Geram-se 17 modelos, correspondendo a cada um dos clusters de loja existentes. 
-    
+A considerável variabilidade inerente às séries temporais de vendas motiva a busca por soluções que superam um modelo monolítico em performance, o qual pode não ser capaz de aprender todos os padrões dos dados. Para contornar esse desafio, utiliza-se a criação de múltiplos modelos especializados, cada um treinado em segmentos específicos do conjunto de dados original. A união das previsões desses modelos visa a um resultado final mais robusto e inteligente. 
+
+Nesse viês, nessa aplicação é desenvolvida três abordagens de ensemble:
+
+ 1. Por Família de Produtos: Criam-se 33 modelos distintos, cada um especializado em uma das 33 famílias de produtos.
+ 2. Por Tipo de Loja: Desenvolvem-se 5 modelos, um para cada um dos cinco tipos de loja (A,B,C,D,E).
+ 3. Por Cluster de Loja: Geram-se 17 modelos, correspondendo a cada um dos clusters de loja existentes.
+
 As performances individuais dos modelos especializados em cada abordagem são avaliadas. Subsequentemente, considera-se a formação de um ensemble final pela média das previsões dos modelos especializados.
 
 Os resultados obtidos são verificados na tabela X
 
 | Ensemble  | Nº de Modelos | RMSLE (média) | RMSE (média) | MAE (média) | R² (média) |
 | --------- | ------------- | ------------- | ------------ | ----------- | ---------- |
-| `family`  | 33            | **0.4287**    | **3.9264**   | **2.6135**  | **0.8129** |
-| `type`    | 5             | **0.5032**    | **7.1221**   | **4.8914**  | **0.7324** |
-| `cluster` | 7             | **0.4018**    | **2.9312**   | **1.9886**  | **0.8593** |
-| `all`     | 45            | **0.4352**    | **4.1273**   | **2.7890**  | **0.8181** |
+| `family`  | 33            | **0.3145**    | **49.9787**  | **27.6311** | 0.8957     |
+| `type`    | 5             | 0.5511        | 139.6999     | 39.6427     | 0.9799     |
+| `cluster` | 17            | 0.5219        | 104.1676     | 32.5279     | **0.9895** |
+| `all`     | 45            | 0.4625        | 97.9487      | 33.2672     | 0.9550     |
 
-Os resultados da avaliação das estratégias de ensemble (Tabela Y) indicam um desempenho variável conforme a forma de especialização dos modelos. O ensemble que especializa modelos por cluster de loja (7 modelos) obteve consistentemente os melhores resultados, com RMSLE de 0.4018, RMSE de 2.9312, MAE de 1.9886 e R² de 0.8593. A abordagem baseada em família de produtos (33 modelos) apresentou o segundo melhor desempenho em RMSLE (0.4287) e nas outras métricas de erro, superando a estratégia por tipo de loja, que registrou os piores indicadores (RMSLE de 0.5032). Curiosamente, o ensemble all, que combina o maior número de modelos (45), não superou a performance da estratégia por cluster nem a por família na maioria das métricas, sugerindo que a simples adição de mais modelos não garante um melhor desempenho e que a heterogeneidade ou a qualidade variável dos modelos componentes podem diluir a precisão final.
+Os resultados da avaliação das estratégias de ensemble (Tabela Y) indicam um desempenho diferenciado conforme a forma de especialização dos modelos. A abordagem que especializa modelos por família de produtos (33 modelos) demonstrou ser a mais eficaz na minimização dos erros, alcançando os menores RMSLE (0.3145), RMSE (49.9787) e MAE (27.6311). Por outro lado, o ensemble focado em clusters de loja (17 modelos) destacou-se com o maior R² (0.9895) e um MAE competitivo (32.5279). A estratégia por tipo de loja (5 modelos), embora tenha apresentado um R² (0.9799) superior ao do ensemble por família, registrou os piores indicadores para RMSLE (0.5511), RMSE (139.6999) e MAE (39.6427). O ensemble all (45 modelos), cujas métricas representam a média dos três ensembles especializados, teve um desempenho misto: foi inferior ao ensemble family na maioria das métricas de erro (RMSLE, RMSE, MAE) e não atingiu o R² dos ensembles cluster ou type. Estes resultados sugerem que a especialização criteriosa dos modelos pode ser mais benéfica do que uma simples agregação geral, e que um número maior de modelos no ensemble all não garantiu, por si só, a melhor performance em todas as métricas. Conclui-se, portanto, que os modelos especializados por família de produtos apresentaram o melhor desempenho entre as abordagens avaliadas. Isso sugere que a segmentação por família é eficaz, pois os produtos dentro de uma mesma família tendem a compartilhar características comportamentais e padrões de demanda semelhantes. Essa homogeneidade interna facilita o aprendizado de padrões relevantes pelos modelos especializados, resultando em uma capacidade de generalização superior quando comparada a outras formas de agrupamento.
+
+Aqui está a seção de conclusão revisada, sem o último parágrafo sobre limitações e trabalhos futuros, e com um tom mais direto:
 
 #### Seção 5 - Conclusão
 
+Este estudo desenvolveu e avaliou uma pipeline de aprendizado de máquina para previsão de demanda no varejo, baseada em dados heterogêneos da competição Kaggle "Store Sales - Time Series Forecasting". A metodologia incluiu integração e pré-processamento de dados, robusta engenharia de atributos, seleção do LightGBM como modelo base, otimização de hiperparâmetros e a aplicação de estratégias de ensemble.
+
+Os resultados confirmaram a eficácia da pipeline. A otimização de hiperparâmetros melhorou significantemente o desempenho do LightGBM individual, e as técnicas de ensemble especializadas demonstraram superioridade. Especificamente, o ensemble por família de produtos alcançou a melhor performance na minimização de erros (RMSLE 0.3145, RMSE 49.9787, MAE 27.6311), o que é consistente com a alta importância da feature family identificada na análise do modelo.
+
+Este estudo evidencia o alto potencial do aprendizado de máquina, particularmente modelos de gradient boosting e ensembles customizados, para a complexa tarefa de previsão de demanda no varejo com dados diversos. A engenharia de atributos e a otimização de hiperparâmetros provaram-se cruciais, mas a especialização de modelos por família de produtos demonstrou ser a estratégia de ensemble mais vantajosa, resultando em ganhos de performance substanciais sobre abordagens genéricas.
